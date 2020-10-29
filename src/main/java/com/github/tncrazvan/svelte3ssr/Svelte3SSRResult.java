@@ -13,9 +13,7 @@ public class Svelte3SSRResult{
     public String head = "";
     public String html = "";
     public String css = "";
-    public String build(){
-        return build("en");
-    }
+    
     public String build(String lang){
         return 
         "<!DOCTYPE html>\n" +
