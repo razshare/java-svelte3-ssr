@@ -1,4 +1,4 @@
-package com.mycompany.arcanossrsvelte;
+package com.github.tncrazvan.svelte3ssr;
 import java.nio.file.Path;
 
 public class Starter {
