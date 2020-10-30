@@ -49,19 +49,22 @@ public class Svelte3SSR {
         String compileScript = 
             "(function main(source){\n" +
             "   return compile(source, {\n" +
-            "       generate: \"ssr\",\n" +
+            "       generate: \"ssr\"," +
             "       format: \"cjs\"\n" +
-            "   }).js.code.match(/create_ssr_component\\(.+\\)(?=\\;)/mgs)[0];\n" +
+            "   }).js.code;\n" +
             "});"
             ;
             Value compileValue = context.eval("js",compileScript);
             String compileResult = compileValue.execute(source).toString();
-
+            compileResult = compileResult.replace("\"use strict\";", "");
+            compileResult = compileResult.replace("const { create_ssr_component } = require(\"svelte/internal\");", "");
+            compileResult = compileResult.replace("exports.default = Component;", "");
+            
             String renderScript = 
-            "(function (props){\n" +
-                "return " +
+            "\"use strict\";\n"
+            + "(function (props){\n" +
                 compileResult +
-                ".render({...props});\n" +
+                "\nreturn Component.render({...props});\n" +
             "});";
             Value renderValue = context.eval("js",renderScript);
             
