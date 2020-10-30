@@ -1,24 +1,11 @@
-const System = Java.type("java.lang.System");
-const path = Java.type("com.mycompany.arcanossrsvelte.PathJS");
-const fs = Java.type("com.mycompany.arcanossrsvelte.FileSystemJS");
-load('./jvm-npm.js');
-
-const { create_ssr_component } = require('./node_modules/svelte/internal/index.js');
-const { compile } = require('./compiler.js');
-
-function main(){
-	/*
-	const result = compile("<p>hello world</p>",{
-		generate: "ssr",
-		format: "cjs"
-	});
-	return JSON.stringify(result)*/
+const System = Java.type('java.lang.System');
+load('./node_modules/jvm-npm/src/main/javascript/jvm-npm.js');
+const path = Java.type('com.github.tncrazvan.svelte3ssr.PathJS');
+const fs = Java.type('com.github.tncrazvan.svelte3ssr.FileSystemJS');
 	
-	const Component = create_ssr_component(($$result, $$props, $$bindings, slots)=>{
-		return `<p>hello world</p>`;
-	});
-	
-	return Component.render();
-}
-
-main();
+const register = require('./node_modules/require-extension/index.js');
+require('svelte/register');
+const App = require('./ww/src/App.svelte').default;
+const { head, html, css } = App.render({
+	answer: 42
+});
