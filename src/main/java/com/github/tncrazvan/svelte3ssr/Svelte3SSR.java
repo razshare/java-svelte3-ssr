@@ -34,11 +34,15 @@ public class Svelte3SSR {
         "const FileReaderJS = Java.type('com.github.tncrazvan.svelte3ssr.FileReaderJS');" +
         "load('./node_modules/jvm-npm/src/main/javascript/jvm-npm.js');" +
         "const { compile } = require('./compiler.js');" +
-        "const { component } = require('./compile.js');" +
-        "console.log('JavaScript initialized.');"
+        "const { component } = require('./compile.js');" 
         ;
         
         context.eval("js",tools);
+        
+        Value ssr = context.eval("js", "(function(service){ssr=service;});");
+        ssr.executeVoid(this);
+        
+        context.eval("js","console.log('JavaScript initialized.');");
     }
     
     public Context getContext(){
