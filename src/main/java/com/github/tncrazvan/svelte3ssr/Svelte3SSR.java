@@ -38,7 +38,14 @@ public class Svelte3SSR {
         "const FileReaderJS = Java.type('com.github.tncrazvan.svelte3ssr.FileReaderJS');" +
         "load('./node_modules/jvm-npm/src/main/javascript/jvm-npm.js');" +
         "const { compile } = require('./compiler.js');" +
-        "const { component } = require('./compile.js');" 
+        "const component = function(filename){" +
+            "return eval(" +
+                "ssr.compile(" +
+                    "FileReaderJS.readString(filename)" +
+                ")" +
+            ");" +
+        "};"
+        //"const { component } = require('./compile.js');" 
         ;
         
         context.eval("js",tools);
