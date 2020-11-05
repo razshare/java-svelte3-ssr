@@ -64,6 +64,7 @@ public class Svelte3SSR {
     private static final Pattern PATTERN_SVELTE_PATH = Pattern.compile("(?<=from)\\s+[\"'].*[\"'];?",Pattern.MULTILINE|Pattern.DOTALL);
     private static final Pattern PATTERN_REQUIRES = Pattern.compile("import\\s\\{?\\s*\\n*([A-z_$][A-z0-9_$]*\\s*\\n*,*\\s*\\n*?)*\\s*\\n*\\}*\\s*\\n*from\\s*\\n*[\"'][A-z0-9_$\\/@\\.,;:|-]*[\"'\\s*\\n*];?",Pattern.MULTILINE|Pattern.DOTALL);
     private static final Pattern PATTERN_USE_STRICT = Pattern.compile("[\"']use strict[\"'];",Pattern.MULTILINE);
+    private static final Pattern PATTERN_EXPORT_DEFAULT = Pattern.compile("export\\s+default\\s+",Pattern.MULTILINE);
     
     public String compileFile(String filename, String charset) throws IOException{
         return compileFile(filename, charset, new LinkedHashMap<>());
@@ -89,7 +90,7 @@ public class Svelte3SSR {
                 if(imports.get(path).containsKey(item)){
                     continue;
                 }
-                String imported = compileFile(path, "UTF-8", imports, false);
+                String imported = compileFile(path, "UTF-8", imports, true);
                 
                 imported = 
                     "const " + item + " = (function(){\n" +
@@ -107,16 +108,23 @@ public class Svelte3SSR {
                 
                 importedPath.put(item, imported);
             }
-//            else{
-//                
-//                if(names.length > 1) {
-//                    String script = "(function (){const {"+item+"} = require('"+path+"'); if(!"+item+") FileReaderJS.readString('"+path+"'); else return "+item+".toString();})";
-//                    String value = context.eval("js",script).execute().asString();
-//                    importedPath.put(item, value);
-//                }else {
-//                    importedPath.put(item, Files.readString(Path.of(path)));
-//                }
-//            }
+            else{
+                
+                if(names.length > 1) {
+                    String script = "(function (){const {"+item+"} = require('"+path+"'); if(!"+item+") FileReaderJS.readString('"+path+"'); else return "+item+".toString();})";
+                    String value = context.eval("js",script).execute().asString();
+                    importedPath.put(item, value);
+                }else {
+                    String value = Files.readString(Path.of(path));
+                    value = PATTERN_EXPORT_DEFAULT.matcher(value).replaceFirst("return ");
+                    value = 
+                        "const "+item+" =(function (){\n" + 
+                            value +
+                        "})();"
+                    ;
+                    importedPath.put(item, value);
+                }
+            }
         }
     }
     
